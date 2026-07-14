@@ -1,21 +1,13 @@
 ---
+name: maintain-pr
 description: Address PR feedback by reviewing comments, making changes, and replying to each comment
 ---
 
 # Address PR Feedback
 
-When the user informs you that they've added comments to a PR, follow this process:
-
 ## 1. Fetch and Review Comments
 
-Use the GitHub MCP tool `mcp__github__pull_request_read` with method='get_review_comments' to fetch PR comments:
-```
-Use mcp__github__pull_request_read tool with:
-- method: "get_review_comments"
-- owner: Repository owner
-- repo: Repository name
-- pullNumber: PR number
-```
+Use the `gh` cli tool to get all the comments.
 
 Read and understand each piece of feedback carefully.
 
@@ -49,14 +41,7 @@ For each comment, determine:
 
 ## 4. Reply to Comments
 
-After addressing each comment, add a reply using the GitHub MCP tool `mcp__github__add_issue_comment`:
-```
-Use mcp__github__add_issue_comment tool with:
-- owner: Repository owner
-- repo: Repository name
-- issue_number: PR number
-- body: Reply text
-```
+After addressing each comment, add a reply using the cli tool.
 
 Keep replies brief and informative:
 - State what action was taken
@@ -65,7 +50,7 @@ Keep replies brief and informative:
 
 **Always sign your comments:**
 ```
--[Your Name]
+_[Harness + model name]_
 ```
 
 ## Example Reply Format
@@ -75,12 +60,12 @@ Keep replies brief and informative:
 Updated the tests to use `.value` for synchronous access.
 All tests pass (104/104). Changes in commit abc1234.
 
-- Claude
+_Claude Code Opus 4.8_
 ```
 
 **For created issues:**
 ```
 Created issue #3 to track this as a future enhancement.
 
-- Claude
+_Antigravity CLI Gemini 3.5 Flash (High)_
 ```

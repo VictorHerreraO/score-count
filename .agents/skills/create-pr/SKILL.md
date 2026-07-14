@@ -1,4 +1,5 @@
 ---
+name: create-pr
 description: Create a pull request with proper structure and documentation
 ---
 
