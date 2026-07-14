@@ -17,6 +17,12 @@
       "sourceType": "github",
       "skillPath": "skills/productivity/handoff/SKILL.md",
       "computedHash": "ad03e8d4ea3cbbff66420eb7ba3cc375b5cbe1821a2449b53e863256cf5b5cde"
+    },
+    "writing-prose-like-a-human": {
+      "source": "kylehughes/writing-prose-like-a-human-for-agents",
+      "sourceType": "github",
+      "skillPath": "skills/writing-prose-like-a-human/SKILL.md",
+      "computedHash": "ff71e3f0645e1bc40dc19c6a03d97127bad966be9c708ab4ee5fee7bba9566d1"
     }
   }
 }
