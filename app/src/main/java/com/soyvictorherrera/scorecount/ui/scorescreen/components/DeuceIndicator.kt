@@ -35,7 +35,6 @@ fun DeuceIndicator(modifier: Modifier = Modifier) {
             Text(
                 text = stringResource(id = R.string.deuce_indicator_text),
                 style = MaterialTheme.typography.titleSmall,
-                fontWeight = FontWeight.SemiBold,
                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
             )
         }

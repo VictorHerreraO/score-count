@@ -60,9 +60,14 @@ fun PlayerScoreCard(
                             else -> 0.85f
                         }
                 ),
-        border = playerScoreCardBorder(showBorder = state.isServing or state.isFinished),
+        border = playerScoreCardBorder(showBorder = state.isServing && !state.isFinished),
         colors =
             CardDefaults.outlinedCardColors(
+                containerColor = if (state.isServing && !state.isFinished) {
+                    MaterialTheme.colorScheme.surfaceVariant
+                } else {
+                    MaterialTheme.colorScheme.surfaceContainer
+                },
                 contentColor = MaterialTheme.colorScheme.primary
             )
     ) {
@@ -90,10 +95,7 @@ fun PlayerScoreCard(
                 }
                 Text(
                     text = state.score.toString(),
-                    fontSize = 96.sp,
-                    fontWeight = FontWeight.Black,
-                    lineHeight = 96.sp,
-                    letterSpacing = (-4).sp
+                    style = MaterialTheme.typography.displayLarge
                 )
             }
         }
