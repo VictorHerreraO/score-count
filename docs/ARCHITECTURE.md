@@ -95,14 +95,14 @@ app/
 │   │   │   ├── MainActivity.kt
 │   │   │   └── ScoreCountApplication.kt
 │   │   └── res/
-│   ├── test/java/com/soyvictorherrera/scorecount/    # Unit Tests (100 tests)
+│   ├── test/java/com/soyvictorherrera/scorecount/    # Unit Tests (134 tests)
 │   │   ├── domain/
-│   │   │   ├── calculator/              # ScoreCalculatorTest (27 tests)
-│   │   │   └── usecase/                 # Use Case Tests (22 tests)
+│   │   │   ├── calculator/              # ScoreCalculatorTest (43 tests)
+│   │   │   └── usecase/                 # Use Case Tests (28 tests)
 │   │   ├── data/
-│   │   │   ├── datasource/              # LocalScoreDataSourceTest (14 tests)
-│   │   │   └── mapper/                  # Mapper Tests (25 tests)
-│   │   └── ui/                          # ViewModel Tests (29 tests)
+│   │   │   ├── datasource/              # LocalScoreDataSourceTest (10 tests)
+│   │   │   └── mapper/                  # Mapper Tests (21 tests)
+│   │   └── ui/                          # ViewModel Tests (32 tests)
 │   ├── androidTest/java/                # Instrumented Tests (3 tests)
 │   └── AndroidManifest.xml
 ├── build.gradle.kts
@@ -233,20 +233,21 @@ Follow this layered approach when adding new functionality:
 
 ### Testing Strategy
 
-The project has **comprehensive test coverage** with **100 tests total**:
+The project has **comprehensive test coverage** with **137 tests total**:
 
-**Unit Tests (97 tests):**
-- **Domain Layer (49 tests)**:
-  - `ScoreCalculatorTest`: 27 tests covering all game rules (pure function tests, no mocking needed)
-  - Use Case Tests: 22 tests for orchestration logic using fake repositories
-- **Data Layer (39 tests)**:
-  - `LocalScoreDataSourceTest`: 14 tests for GameState persistence, state restoration across app restarts
-  - `GameStateMapperTest`: 15 tests for bidirectional proto ↔ domain mapping
-  - `MatchMapperTest`: 10 tests for bidirectional entity ↔ domain mapping
-- **UI Layer (29 tests)**:
-  - `ScoreViewModelTest`: 9 tests for state exposure, delegation, auto-save
+**Unit Tests (134 tests):**
+- **Domain Layer (71 tests)**:
+  - `ScoreCalculatorTest`: 43 tests covering all game rules (pure function tests, no mocking needed)
+  - Use Case Tests: 28 tests for orchestration logic using fake repositories
+- **Data Layer (31 tests)**:
+  - `LocalScoreDataSourceTest`: 10 tests for GameState persistence, state restoration across app restarts
+  - `GameStateMapperTest`: 12 tests for bidirectional proto ↔ domain mapping
+  - `MatchMapperTest`: 9 tests for bidirectional entity ↔ domain mapping
+- **UI Layer (32 tests)**:
+  - `ScoreViewModelTest`: 10 tests for state exposure, delegation, auto-save
   - `MatchHistoryViewModelTest`: 5 tests for loading, updates, error handling
-  - `SettingsViewModelTest`: 12 tests for all settings mutations
+  - `SettingsViewModelTest`: 14 tests for all settings mutations
+  - `MainViewModelTest`: 3 tests for the main application entry point ViewModel
   - All ViewModel tests use fake repositories (no mocking frameworks)
 
 **Instrumented Tests (3 tests):**
@@ -290,6 +291,17 @@ The project has **comprehensive test coverage** with **100 tests total**:
 - **JVM Target**: 11
 - **ProGuard**: Enabled for release builds
 - **Version Catalog**: `gradle/libs.versions.toml` for centralized dependency management
+
+## Architecture Decision Records (ADRs)
+
+The key architecture design choices for Score-Count are documented in detail as Architecture Decision Records (ADRs) under [docs/adr/](file:///Users/vherrera/Workspace/Score-count/docs/adr/):
+
+- [ADR 001: Adopt Layered Architecture with Rich Domain Model](file:///Users/vherrera/Workspace/Score-count/docs/adr/001-adopt-layered-architecture-with-rich-domain-model.md) - Establishes the three-layer layout (UI, Domain, Data) and pure `ScoreCalculator` business logic.
+- [ADR 002: Persist Game State with Proto DataStore](file:///Users/vherrera/Workspace/Score-count/docs/adr/002-persist-game-state-with-proto-datastore.md) - Decouples active game state persistence from simple preferences and room databases, avoiding circular dependencies.
+- [ADR 003: Expose State Using StateFlow](file:///Users/vherrera/Workspace/Score-count/docs/adr/003-expose-state-using-stateflow.md) - Standardizes state propagation from repositories and data sources directly to Compose UI.
+- [ADR 004: Use Room for Match History Persistence](file:///Users/vherrera/Workspace/Score-count/docs/adr/004-use-room-for-match-history.md) - Employs a local Room SQLite database to handle query-heavy match history logs.
+- [ADR 005: Integrate S Pen via Declarative Air Actions](file:///Users/vherrera/Workspace/Score-count/docs/adr/005-integrate-s-pen-via-declarative-air-actions.md) - Defines remote XML actions and event routing in MainActivity for Samsung S Pen gestures.
+- [ADR 006: Prefer Fake Repositories Over Mocks](file:///Users/vherrera/Workspace/Score-count/docs/adr/006-prefer-fake-repositories-over-mocks.md) - Promotes testing with stateful fake repositories instead of brittle mocking frameworks.
 
 ## Architectural Benefits
 
