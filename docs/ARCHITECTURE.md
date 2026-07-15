@@ -302,6 +302,7 @@ The key architecture design choices for Score-Count are documented in detail as 
 - [ADR 004: Use Room for Match History Persistence](file:///Users/vherrera/Workspace/Score-count/docs/adr/004-use-room-for-match-history.md) - Employs a local Room SQLite database to handle query-heavy match history logs.
 - [ADR 005: Integrate S Pen via Declarative Air Actions](file:///Users/vherrera/Workspace/Score-count/docs/adr/005-integrate-s-pen-via-declarative-air-actions.md) - Defines remote XML actions and event routing in MainActivity for Samsung S Pen gestures.
 - [ADR 006: Prefer Fake Repositories Over Mocks](file:///Users/vherrera/Workspace/Score-count/docs/adr/006-prefer-fake-repositories-over-mocks.md) - Promotes testing with stateful fake repositories instead of brittle mocking frameworks.
+- [ADR 007: Implement Challenger Queue System](file:///Users/vherrera/Workspace/Score-count/docs/adr/007-implement-challenger-queue-system.md) - Outlines the design and architecture of the challenger queue, player rotation logic, settings persistence, and autocomplete bottom sheet.
 
 ## Architectural Benefits
 
