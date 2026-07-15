@@ -237,7 +237,12 @@ class GameStateMapperTest {
                 player1SetsWon = 3,
                 player2SetsWon = 2,
                 isDeuce = false,
-                isFinished = true
+                isFinished = true,
+                challengerQueue =
+                    listOf(
+                        Player(id = 3, name = "Charlie", score = 0),
+                        Player(id = 4, name = "David", score = 0)
+                    )
             )
 
         // When - Convert domain → proto → domain
@@ -256,6 +261,13 @@ class GameStateMapperTest {
         assertEquals(originalGameState.player2SetsWon, resultGameState.player2SetsWon)
         assertEquals(originalGameState.isDeuce, resultGameState.isDeuce)
         assertEquals(originalGameState.isFinished, resultGameState.isFinished)
+        assertEquals(originalGameState.challengerQueue.size, resultGameState.challengerQueue.size)
+        assertEquals(originalGameState.challengerQueue[0].id, resultGameState.challengerQueue[0].id)
+        assertEquals(originalGameState.challengerQueue[0].name, resultGameState.challengerQueue[0].name)
+        assertEquals(originalGameState.challengerQueue[0].score, resultGameState.challengerQueue[0].score)
+        assertEquals(originalGameState.challengerQueue[1].id, resultGameState.challengerQueue[1].id)
+        assertEquals(originalGameState.challengerQueue[1].name, resultGameState.challengerQueue[1].name)
+        assertEquals(originalGameState.challengerQueue[1].score, resultGameState.challengerQueue[1].score)
     }
 
     @Test
@@ -371,5 +383,80 @@ class GameStateMapperTest {
         assertEquals(888, result.player2.score)
         assertEquals(50, result.player1SetsWon)
         assertEquals(49, result.player2SetsWon)
+    }
+
+    @Test
+    fun `toProto maps challengerQueue correctly`() {
+        // Given
+        val gameState =
+            GameState(
+                player1 = Player(id = 1, name = "Player 1"),
+                player2 = Player(id = 2, name = "Player 2"),
+                servingPlayerId = 1,
+                challengerQueue =
+                    listOf(
+                        Player(id = 3, name = "Challenger A"),
+                        Player(id = 4, name = "Challenger B")
+                    )
+            )
+
+        // When
+        val proto = gameState.toProto()
+
+        // Then
+        assertEquals(2, proto.challengerQueueCount)
+        assertEquals(3, proto.getChallengerQueue(0).id)
+        assertEquals("Challenger A", proto.getChallengerQueue(0).name)
+        assertEquals(4, proto.getChallengerQueue(1).id)
+        assertEquals("Challenger B", proto.getChallengerQueue(1).name)
+    }
+
+    @Test
+    fun `toDomain maps challengerQueue correctly`() {
+        // Given
+        val proto =
+            GameStateProto
+                .newBuilder()
+                .setPlayer1(
+                    PlayerProto
+                        .newBuilder()
+                        .setId(1)
+                        .setName("Player 1")
+                        .setScore(0)
+                        .build()
+                ).setPlayer2(
+                    PlayerProto
+                        .newBuilder()
+                        .setId(2)
+                        .setName("Player 2")
+                        .setScore(0)
+                        .build()
+                ).setServingPlayerId(1)
+                .addAllChallengerQueue(
+                    listOf(
+                        PlayerProto
+                            .newBuilder()
+                            .setId(3)
+                            .setName("Challenger A")
+                            .setScore(0)
+                            .build(),
+                        PlayerProto
+                            .newBuilder()
+                            .setId(4)
+                            .setName("Challenger B")
+                            .setScore(0)
+                            .build()
+                    )
+                ).build()
+
+        // When
+        val domain = proto.toDomain()
+
+        // Then
+        assertEquals(2, domain.challengerQueue.size)
+        assertEquals(3, domain.challengerQueue[0].id)
+        assertEquals("Challenger A", domain.challengerQueue[0].name)
+        assertEquals(4, domain.challengerQueue[1].id)
+        assertEquals("Challenger B", domain.challengerQueue[1].name)
     }
 }

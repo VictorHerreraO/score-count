@@ -18,6 +18,7 @@ fun GameState.toProto(): GameStateProto =
         .setPlayer2SetsWon(player2SetsWon)
         .setIsDeuce(isDeuce)
         .setIsFinished(isFinished)
+        .addAllChallengerQueue(challengerQueue.map { it.toProto() })
         .build()
 
 /**
@@ -31,7 +32,8 @@ fun GameStateProto.toDomain(): GameState =
         player1SetsWon = player1SetsWon,
         player2SetsWon = player2SetsWon,
         isDeuce = isDeuce,
-        isFinished = isFinished
+        isFinished = isFinished,
+        challengerQueue = challengerQueueList.map { it.toDomain() }
     )
 
 /**
