@@ -425,6 +425,131 @@ class ScoreCalculatorTest {
     }
 
     @Test
+    fun `resetGame with challengerMode rotates player 2 out when player 1 wins`() {
+        val settings = defaultSettings.copy(challengerMode = true)
+        val queue =
+            listOf(
+                Player(id = 3, name = "Charlie"),
+                Player(id = 4, name = "Dave")
+            )
+
+        val newState =
+            ScoreCalculator.resetGame(
+                player1Id = 1,
+                player2Id = 2,
+                player1Name = "Alice",
+                player2Name = "Bob",
+                settings = settings,
+                lastGameWinnerId = 1,
+                completedGames = 1,
+                challengerQueue = queue,
+                isFinished = true
+            )
+
+        // Winner (Alice/1) stays on
+        assertEquals(1, newState.player1.id)
+        assertEquals("Alice", newState.player1.name)
+        assertEquals(0, newState.player1.score)
+
+        // Loser (Bob/2) is rotated out, next in queue (Charlie/3) steps up
+        assertEquals(3, newState.player2.id)
+        assertEquals("Charlie", newState.player2.name)
+        assertEquals(0, newState.player2.score)
+
+        // Loser is appended to the end of the queue
+        assertEquals(2, newState.challengerQueue.size)
+        assertEquals(4, newState.challengerQueue[0].id)
+        assertEquals("Dave", newState.challengerQueue[0].name)
+        assertEquals(2, newState.challengerQueue[1].id)
+        assertEquals("Bob", newState.challengerQueue[1].name)
+    }
+
+    @Test
+    fun `resetGame with challengerMode rotates player 1 out when player 2 wins`() {
+        val settings = defaultSettings.copy(challengerMode = true)
+        val queue =
+            listOf(
+                Player(id = 3, name = "Charlie"),
+                Player(id = 4, name = "Dave")
+            )
+
+        val newState =
+            ScoreCalculator.resetGame(
+                player1Id = 1,
+                player2Id = 2,
+                player1Name = "Alice",
+                player2Name = "Bob",
+                settings = settings,
+                lastGameWinnerId = 2,
+                completedGames = 1,
+                challengerQueue = queue,
+                isFinished = true
+            )
+
+        // Loser (Alice/1) is rotated out, next in queue (Charlie/3) steps up
+        assertEquals(3, newState.player1.id)
+        assertEquals("Charlie", newState.player1.name)
+        assertEquals(0, newState.player1.score)
+
+        // Winner (Bob/2) stays on
+        assertEquals(2, newState.player2.id)
+        assertEquals("Bob", newState.player2.name)
+        assertEquals(0, newState.player2.score)
+
+        // Loser is appended to the end of the queue
+        assertEquals(2, newState.challengerQueue.size)
+        assertEquals(4, newState.challengerQueue[0].id)
+        assertEquals("Dave", newState.challengerQueue[0].name)
+        assertEquals(1, newState.challengerQueue[1].id)
+        assertEquals("Alice", newState.challengerQueue[1].name)
+    }
+
+    @Test
+    fun `resetGame with challengerMode does not rotate when queue is empty`() {
+        val settings = defaultSettings.copy(challengerMode = true)
+
+        val newState =
+            ScoreCalculator.resetGame(
+                player1Id = 1,
+                player2Id = 2,
+                player1Name = "Alice",
+                player2Name = "Bob",
+                settings = settings,
+                lastGameWinnerId = 1,
+                completedGames = 1,
+                challengerQueue = emptyList(),
+                isFinished = true
+            )
+
+        assertEquals(1, newState.player1.id)
+        assertEquals(2, newState.player2.id)
+        assertTrue(newState.challengerQueue.isEmpty())
+    }
+
+    @Test
+    fun `resetGame with challengerMode does not rotate when match is not finished`() {
+        val settings = defaultSettings.copy(challengerMode = true)
+        val queue = listOf(Player(id = 3, name = "Charlie"))
+
+        val newState =
+            ScoreCalculator.resetGame(
+                player1Id = 1,
+                player2Id = 2,
+                player1Name = "Alice",
+                player2Name = "Bob",
+                settings = settings,
+                lastGameWinnerId = 1,
+                completedGames = 1,
+                challengerQueue = queue,
+                isFinished = false
+            )
+
+        assertEquals(1, newState.player1.id)
+        assertEquals(2, newState.player2.id)
+        assertEquals(queue, newState.challengerQueue)
+    }
+
+    @Test
     fun `best of 3 sets match finishes at 2 sets won`() {
         val settings = defaultSettings.copy(numberOfSets = 3)
         val state =

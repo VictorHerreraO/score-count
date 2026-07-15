@@ -48,6 +48,7 @@ class SettingsLocalDataSource
             @Deprecated("Use KEY_SERVING_RULE instead")
             val KEY_WINNER_SERVES_NEXT_GAME = booleanPreferencesKey("winner_serves_next_game")
             val KEY_KEEP_SCREEN_ON = booleanPreferencesKey("keep_screen_on")
+            val KEY_CHALLENGER_MODE = booleanPreferencesKey("challenger_mode")
         }
 
         val settings: StateFlow<GameSettings> =
@@ -92,7 +93,8 @@ class SettingsLocalDataSource
                                     }
                                 }
                             },
-                        keepScreenOn = preferences[PreferencesKeys.KEY_KEEP_SCREEN_ON] ?: default.keepScreenOn
+                        keepScreenOn = preferences[PreferencesKeys.KEY_KEEP_SCREEN_ON] ?: default.keepScreenOn,
+                        challengerMode = preferences[PreferencesKeys.KEY_CHALLENGER_MODE] ?: default.challengerMode
                     )
                 }.stateIn(
                     scope = scope,
@@ -116,6 +118,7 @@ class SettingsLocalDataSource
                 // Remove old key if it exists (cleanup migration)
                 preferences.remove(PreferencesKeys.KEY_WINNER_SERVES_NEXT_GAME)
                 preferences[PreferencesKeys.KEY_KEEP_SCREEN_ON] = settings.keepScreenOn
+                preferences[PreferencesKeys.KEY_CHALLENGER_MODE] = settings.challengerMode
             }
         }
     }

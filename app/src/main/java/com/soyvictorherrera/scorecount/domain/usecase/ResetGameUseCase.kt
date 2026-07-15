@@ -39,7 +39,9 @@ class ResetGameUseCase
                     player2Name = currentState.player2.name,
                     settings = settings,
                     lastGameWinnerId = winnerId,
-                    completedGames = completedGames
+                    completedGames = completedGames,
+                    challengerQueue = currentState.challengerQueue,
+                    isFinished = currentState.isFinished
                 )
 
             scoreRepository.updateGameState(newState)

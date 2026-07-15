@@ -12,5 +12,6 @@ data class GameSettings(
     val serveRotationAfterPoints: Int = 2,
     val serveChangeAfterDeuce: Int = 1,
     val servingRule: ServingRule = ServingRule.DEFAULT,
-    val keepScreenOn: Boolean = false
+    val keepScreenOn: Boolean = false,
+    val challengerMode: Boolean = false
 )
