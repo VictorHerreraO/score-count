@@ -13,12 +13,14 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import com.soyvictorherrera.scorecount.domain.model.GameSettings
 import com.soyvictorherrera.scorecount.domain.model.GameState
 import com.soyvictorherrera.scorecount.ui.extension.contentVerticalPadding
 import com.soyvictorherrera.scorecount.ui.scorescreen.ScoreScreenCallbacks
 import com.soyvictorherrera.scorecount.ui.scorescreen.components.BottomBarActions
+import com.soyvictorherrera.scorecount.ui.scorescreen.components.ChallengerQueueRow
 import com.soyvictorherrera.scorecount.ui.scorescreen.components.DeuceIndicator
 import com.soyvictorherrera.scorecount.ui.scorescreen.components.MatchScoreTopAppBar
 import com.soyvictorherrera.scorecount.ui.scorescreen.components.PlayerScoreCard
@@ -59,6 +61,13 @@ fun ScoreScreenPortrait(
                     .contentVerticalPadding(hasTopBar = gameSettings.showSets),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
+            if (gameSettings.challengerMode && gameState.challengerQueue.isNotEmpty()) {
+                ChallengerQueueRow(
+                    queue = gameState.challengerQueue,
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
+            }
+
             PlayerScoreCard(
                 state =
                     PlayerScoreCardState(
@@ -67,9 +76,10 @@ fun ScoreScreenPortrait(
                         isServing = gameSettings.markServe && gameState.servingPlayerId == gameState.player1.id,
                         isFinished = gameState.isFinished
                     ),
-                showPlayerName = gameSettings.showNames,
+                showPlayerName = gameSettings.showNames || gameSettings.challengerMode,
                 onIncrement = { callbacks.onIncrement(gameState.player1.id) },
-                modifier = Modifier.weight(1f)
+                playerNameTestTag = "player_1_name",
+                modifier = Modifier.weight(1f).testTag("player_1_score")
             )
 
             AnimatedVisibility(
@@ -88,9 +98,10 @@ fun ScoreScreenPortrait(
                         isServing = gameSettings.markServe && gameState.servingPlayerId == gameState.player2.id,
                         isFinished = gameState.isFinished
                     ),
-                showPlayerName = gameSettings.showNames,
+                showPlayerName = gameSettings.showNames || gameSettings.challengerMode,
                 onIncrement = { callbacks.onIncrement(gameState.player2.id) },
-                modifier = Modifier.weight(1f)
+                playerNameTestTag = "player_2_name",
+                modifier = Modifier.weight(1f).testTag("player_2_score")
             )
         }
     }

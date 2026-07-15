@@ -1,3 +1,5 @@
+@file:Suppress("TopLevelPropertyNaming")
+
 package com.soyvictorherrera.scorecount.ui.theme
 
 import androidx.compose.material3.Typography

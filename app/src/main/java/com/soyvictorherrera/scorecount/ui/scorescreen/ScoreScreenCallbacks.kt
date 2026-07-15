@@ -15,7 +15,8 @@ data class ScoreScreenCallbacks(
     val onStartNewGame: () -> Unit,
     val onNavigateToHistory: () -> Unit,
     val onNavigateToSettings: () -> Unit,
-    val onUndo: () -> Unit
+    val onUndo: () -> Unit,
+    val onManageQueue: () -> Unit
 )
 
 /**
@@ -28,5 +29,6 @@ fun ScoreScreenCallbacks.toGameBarActionsCallbacks() =
         onStartNewGame = onStartNewGame,
         onUndo = onUndo,
         onSettings = onNavigateToSettings,
-        onNavigateToHistory = onNavigateToHistory
+        onNavigateToHistory = onNavigateToHistory,
+        onManageQueue = onManageQueue
     )

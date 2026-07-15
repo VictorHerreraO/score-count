@@ -22,8 +22,8 @@ import androidx.window.core.layout.WindowSizeClass.Companion.WIDTH_DP_EXPANDED_L
 import androidx.window.core.layout.WindowSizeClass.Companion.WIDTH_DP_MEDIUM_LOWER_BOUND
 
 private object BottomBarActionsDefaults {
-    const val MAX_BOTTOM_BAR_ACTIONS = 3
-    const val MAX_BOTTOM_BAR_ACTIONS_LARGE = 4
+    const val MAX_BOTTOM_BAR_ACTIONS = 4
+    const val MAX_BOTTOM_BAR_ACTIONS_LARGE = 5
 
     val gameBarActions: List<GameBarAction> =
         listOf(
@@ -31,6 +31,7 @@ private object BottomBarActionsDefaults {
             GameBarAction.SWITCH_SERVE,
             GameBarAction.RESET,
             GameBarAction.SETTINGS,
+            GameBarAction.MANAGE_QUEUE,
         )
 }
 
