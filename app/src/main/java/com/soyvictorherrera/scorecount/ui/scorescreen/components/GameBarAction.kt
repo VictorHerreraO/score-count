@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Undo
+import androidx.compose.material.icons.filled.Group
 import androidx.compose.material.icons.filled.MoreHoriz
 import androidx.compose.material.icons.filled.Replay
 import androidx.compose.material.icons.filled.RestartAlt
@@ -18,6 +19,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.soyvictorherrera.scorecount.R
@@ -32,6 +34,7 @@ enum class GameBarAction(
     START_NEW_GAME(icon = Icons.Default.Replay, text = R.string.action_start_new_game),
     SWITCH_SERVE(icon = Icons.Default.SwapHoriz, text = R.string.action_switch),
     UNDO(icon = Icons.AutoMirrored.Default.Undo, text = R.string.action_undo),
+    MANAGE_QUEUE(icon = Icons.Default.Group, text = R.string.action_manage_queue),
 }
 
 data class GameBarState(
@@ -59,10 +62,16 @@ fun GameBarActionButton(
     isActionEnabled: (GameBarAction) -> Boolean,
     onClick: (GameBarAction) -> Unit,
 ) {
+    val finalModifier =
+        when (action) {
+            GameBarAction.MANAGE_QUEUE -> modifier.testTag("manage_queue_button")
+            GameBarAction.RESET -> modifier.testTag("reset_game_button")
+            else -> modifier
+        }
     OutlinedButton(
         onClick = { onClick(action) },
         enabled = isActionEnabled(action),
-        modifier = modifier,
+        modifier = finalModifier,
         shape = MaterialTheme.shapes.extraLarge,
         contentPadding =
             if (showText) {

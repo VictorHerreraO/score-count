@@ -2,6 +2,7 @@ package com.soyvictorherrera.scorecount.domain.calculator
 
 import com.soyvictorherrera.scorecount.domain.model.GameSettings
 import com.soyvictorherrera.scorecount.domain.model.GameState
+import com.soyvictorherrera.scorecount.domain.model.Player
 import com.soyvictorherrera.scorecount.domain.model.ServingRule
 import kotlin.math.abs
 
@@ -196,44 +197,99 @@ object ScoreCalculator {
         player2Name: String,
         settings: GameSettings,
         lastGameWinnerId: Int? = null,
-        completedGames: Int = 0
+        completedGames: Int = 0,
+        challengerQueue: List<Player> = emptyList(),
+        isFinished: Boolean = false
     ): GameState {
+        val (finalPlayer1, finalPlayer2, finalQueue) =
+            rotatePlayers(
+                players =
+                    Pair(
+                        Player(id = player1Id, name = player1Name, score = 0),
+                        Player(id = player2Id, name = player2Name, score = 0)
+                    ),
+                settings = settings,
+                lastGameWinnerId = lastGameWinnerId,
+                challengerQueue = challengerQueue,
+                isFinished = isFinished
+            )
+
         val firstServer =
             when {
                 // Check serving rule first before null check
-                settings.servingRule == ServingRule.PLAYER_ONE_SERVES -> player1Id
+                settings.servingRule == ServingRule.PLAYER_ONE_SERVES -> finalPlayer1.id
                 settings.servingRule == ServingRule.ALTERNATE -> {
                     // Alternate between players based on completed games
                     // Game 1 (completedGames=0): player1, Game 2 (completedGames=1): player2, etc.
-                    if (completedGames % 2 == 0) player1Id else player2Id
+                    if (completedGames % 2 == 0) finalPlayer1.id else finalPlayer2.id
                 }
                 settings.servingRule == ServingRule.WINNER_SERVES && lastGameWinnerId != null -> lastGameWinnerId
                 settings.servingRule == ServingRule.LOSER_SERVES && lastGameWinnerId != null -> {
-                    if (lastGameWinnerId == player1Id) player2Id else player1Id
+                    if (lastGameWinnerId == finalPlayer1.id) finalPlayer2.id else finalPlayer1.id
                 }
                 // Fallback for initial game when no winner is set (WINNER_SERVES or LOSER_SERVES)
-                else -> player1Id
+                else -> finalPlayer1.id
             }
 
         return GameState(
-            player1 =
-                com.soyvictorherrera.scorecount.domain.model.Player(
-                    id = player1Id,
-                    name = player1Name,
-                    score = 0
-                ),
-            player2 =
-                com.soyvictorherrera.scorecount.domain.model.Player(
-                    id = player2Id,
-                    name = player2Name,
-                    score = 0
-                ),
+            player1 = finalPlayer1,
+            player2 = finalPlayer2,
             servingPlayerId = firstServer,
             player1SetsWon = 0,
             player2SetsWon = 0,
             isDeuce = false,
-            isFinished = false
+            isFinished = false,
+            challengerQueue = finalQueue
         )
+    }
+
+    private fun rotatePlayers(
+        players: Pair<Player, Player>,
+        settings: GameSettings,
+        lastGameWinnerId: Int?,
+        challengerQueue: List<Player>,
+        isFinished: Boolean
+    ): Triple<Player, Player, List<Player>> {
+        val (player1, player2) = players
+        val isRotationActive =
+            settings.challengerMode && isFinished && lastGameWinnerId != null && challengerQueue.isNotEmpty()
+
+        return if (isRotationActive) {
+            val nextPlayer = challengerQueue.first().copy(score = 0)
+            if (lastGameWinnerId == player1.id) {
+                // Player 1 won, Player 2 lost.
+                // Player 1 stays as Player 1. Next player becomes Player 2.
+                // Player 2 goes to the end of the queue.
+                val loser = player2.copy(score = 0)
+                Triple(
+                    player1.copy(score = 0),
+                    nextPlayer,
+                    challengerQueue.drop(1) + loser
+                )
+            } else if (lastGameWinnerId == player2.id) {
+                // Player 2 won, Player 1 lost.
+                // Player 2 stays as Player 2. Next player becomes Player 1.
+                // Player 1 goes to the end of the queue.
+                val loser = player1.copy(score = 0)
+                Triple(
+                    nextPlayer,
+                    player2.copy(score = 0),
+                    challengerQueue.drop(1) + loser
+                )
+            } else {
+                Triple(
+                    player1.copy(score = 0),
+                    player2.copy(score = 0),
+                    challengerQueue
+                )
+            }
+        } else {
+            Triple(
+                player1.copy(score = 0),
+                player2.copy(score = 0),
+                challengerQueue
+            )
+        }
     }
 
     /**

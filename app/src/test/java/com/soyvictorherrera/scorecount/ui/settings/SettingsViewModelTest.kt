@@ -276,4 +276,18 @@ class SettingsViewModelTest {
             testDispatcher.scheduler.advanceUntilIdle()
             assertEquals(false, viewModel.servingRulePickerVisible.first())
         }
+
+    @Test
+    fun `updateChallengerMode updates settings and saves`() =
+        runTest {
+            val initialSettings = viewModel.settings.first()
+            val newValue = !initialSettings.challengerMode
+
+            viewModel.updateChallengerMode(newValue)
+            testDispatcher.scheduler.advanceUntilIdle()
+
+            val updatedSettings = viewModel.settings.first()
+            assertEquals(newValue, updatedSettings.challengerMode)
+            assertEquals(updatedSettings, fakeSettingsRepository.getSavedSettings())
+        }
 }

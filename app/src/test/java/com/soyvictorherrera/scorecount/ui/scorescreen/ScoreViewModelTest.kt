@@ -1,5 +1,7 @@
 package com.soyvictorherrera.scorecount.ui.scorescreen
 
+import com.soyvictorherrera.scorecount.data.database.dao.PlayerProfileDao
+import com.soyvictorherrera.scorecount.data.database.entity.PlayerProfileEntity
 import com.soyvictorherrera.scorecount.domain.model.GameSettings
 import com.soyvictorherrera.scorecount.domain.model.GameState
 import com.soyvictorherrera.scorecount.domain.model.Player
@@ -32,6 +34,7 @@ class ScoreViewModelTest {
     private lateinit var fakeScoreRepository: FakeScoreRepository
     private lateinit var fakeSettingsRepository: FakeSettingsRepository
     private lateinit var fakeMatchRepository: FakeMatchRepository
+    private lateinit var fakePlayerProfileDao: FakePlayerProfileDao
     private lateinit var saveMatchUseCase: SaveMatchUseCase
 
     @BeforeEach
@@ -41,6 +44,7 @@ class ScoreViewModelTest {
         fakeScoreRepository = FakeScoreRepository()
         fakeSettingsRepository = FakeSettingsRepository()
         fakeMatchRepository = FakeMatchRepository()
+        fakePlayerProfileDao = FakePlayerProfileDao()
 
         // Create use cases
         val incrementScoreUseCase = IncrementScoreUseCase(fakeScoreRepository, fakeSettingsRepository)
@@ -66,6 +70,7 @@ class ScoreViewModelTest {
                 scoreRepository = fakeScoreRepository,
                 scoreUseCases = scoreUseCases,
                 settingsRepository = fakeSettingsRepository,
+                playerProfileDao = fakePlayerProfileDao,
                 dispatcher = testDispatcher
             )
         testDispatcher.scheduler.advanceUntilIdle() // Let init block complete
@@ -280,6 +285,7 @@ class ScoreViewModelTest {
                     scoreRepository = fakeScoreRepository,
                     scoreUseCases = isolatedScoreUseCases,
                     settingsRepository = fakeSettingsRepository,
+                    playerProfileDao = fakePlayerProfileDao,
                     dispatcher = testDispatcher
                 )
             testDispatcher.scheduler.advanceUntilIdle()
@@ -345,4 +351,139 @@ class ScoreViewModelTest {
             // Then - Has undo history
             assertTrue(viewModel.hasUndoHistory.value)
         }
+
+    @Test
+    fun `toggleChallengerMode saves setting to repository`() =
+        runTest {
+            fakeSettingsRepository.setSettings(GameSettings(challengerMode = false))
+            viewModel.toggleChallengerMode(enabled = true)
+            testDispatcher.scheduler.advanceUntilIdle()
+            assertTrue(viewModel.gameSettings.first().challengerMode)
+        }
+
+    @Test
+    fun `addPlayerToQueue inserts profile to DB and appends to queue with unique ID`() =
+        runTest {
+            val initialState =
+                GameState(
+                    player1 = Player(id = 1, name = "Alice"),
+                    player2 = Player(id = 2, name = "Bob"),
+                    servingPlayerId = 1,
+                    challengerQueue = listOf(Player(id = 3, name = "Charlie"))
+                )
+            fakeScoreRepository.setState(initialState)
+            viewModel.addPlayerToQueue("  Dave  ")
+            testDispatcher.scheduler.advanceUntilIdle()
+
+            val newState = viewModel.gameState.first()
+            assertEquals(2, newState.challengerQueue.size)
+            assertEquals("Charlie", newState.challengerQueue[0].name)
+            assertEquals("Dave", newState.challengerQueue[1].name)
+            assertEquals(4, newState.challengerQueue[1].id)
+
+            val savedProfiles = fakePlayerProfileDao.getAllPlayerProfiles().first()
+            assertEquals(1, savedProfiles.size)
+            assertEquals("Dave", savedProfiles[0].name)
+        }
+
+    @Test
+    fun `addPlayerToQueue ignores blank names`() =
+        runTest {
+            val initialState =
+                GameState(
+                    player1 = Player(id = 1, name = "Alice"),
+                    player2 = Player(id = 2, name = "Bob"),
+                    servingPlayerId = 1,
+                    challengerQueue = emptyList()
+                )
+            fakeScoreRepository.setState(initialState)
+            viewModel.addPlayerToQueue("   ")
+            testDispatcher.scheduler.advanceUntilIdle()
+
+            val newState = viewModel.gameState.first()
+            assertTrue(newState.challengerQueue.isEmpty())
+            assertTrue(fakePlayerProfileDao.getAllPlayerProfiles().first().isEmpty())
+        }
+
+    @Test
+    fun `removePlayerFromQueue removes player and updates game state`() =
+        runTest {
+            val initialState =
+                GameState(
+                    player1 = Player(id = 1, name = "Alice"),
+                    player2 = Player(id = 2, name = "Bob"),
+                    servingPlayerId = 1,
+                    challengerQueue = listOf(Player(id = 3, name = "Charlie"), Player(id = 4, name = "Dave"))
+                )
+            fakeScoreRepository.setState(initialState)
+            viewModel.removePlayerFromQueue(playerId = 3)
+            testDispatcher.scheduler.advanceUntilIdle()
+
+            val newState = viewModel.gameState.first()
+            assertEquals(1, newState.challengerQueue.size)
+            assertEquals("Dave", newState.challengerQueue[0].name)
+        }
+
+    @Test
+    fun `skipPlayerInQueue moves player to end of queue`() =
+        runTest {
+            val initialState =
+                GameState(
+                    player1 = Player(id = 1, name = "Alice"),
+                    player2 = Player(id = 2, name = "Bob"),
+                    servingPlayerId = 1,
+                    challengerQueue =
+                        listOf(
+                            Player(id = 3, name = "Charlie"),
+                            Player(id = 4, name = "Dave"),
+                            Player(id = 5, name = "Eve")
+                        )
+                )
+            fakeScoreRepository.setState(initialState)
+            viewModel.skipPlayerInQueue(playerId = 3)
+            testDispatcher.scheduler.advanceUntilIdle()
+
+            val newState = viewModel.gameState.first()
+            assertEquals(3, newState.challengerQueue.size)
+            assertEquals("Dave", newState.challengerQueue[0].name)
+            assertEquals("Eve", newState.challengerQueue[1].name)
+            assertEquals("Charlie", newState.challengerQueue[2].name)
+        }
+
+    @Test
+    fun `skipPlayerInQueue is no-op if queue size is 1 or fewer`() =
+        runTest {
+            val initialState =
+                GameState(
+                    player1 = Player(id = 1, name = "Alice"),
+                    player2 = Player(id = 2, name = "Bob"),
+                    servingPlayerId = 1,
+                    challengerQueue = listOf(Player(id = 3, name = "Charlie"))
+                )
+            fakeScoreRepository.setState(initialState)
+            viewModel.skipPlayerInQueue(playerId = 3)
+            testDispatcher.scheduler.advanceUntilIdle()
+
+            val newState = viewModel.gameState.first()
+            assertEquals(1, newState.challengerQueue.size)
+            assertEquals("Charlie", newState.challengerQueue[0].name)
+        }
+}
+
+class FakePlayerProfileDao : PlayerProfileDao {
+    private val profiles = mutableListOf<PlayerProfileEntity>()
+
+    override fun getAllPlayerProfiles(): Flow<List<PlayerProfileEntity>> =
+        flow {
+            emit(profiles)
+        }
+
+    override suspend fun insert(playerProfile: PlayerProfileEntity): Long {
+        profiles.add(playerProfile)
+        return profiles.size.toLong()
+    }
+
+    override suspend fun delete(playerProfile: PlayerProfileEntity) {
+        profiles.remove(playerProfile)
+    }
 }

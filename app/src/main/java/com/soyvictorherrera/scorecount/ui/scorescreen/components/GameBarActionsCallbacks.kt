@@ -12,6 +12,7 @@ data class GameBarActionsCallbacks(
     val onUndo: () -> Unit,
     val onSettings: () -> Unit,
     val onNavigateToHistory: () -> Unit,
+    val onManageQueue: () -> Unit,
 )
 
 /**
@@ -25,5 +26,6 @@ fun GameBarActionsCallbacks.handleAction(action: GameBarAction) {
         GameBarAction.START_NEW_GAME -> onStartNewGame()
         GameBarAction.SWITCH_SERVE -> onSwitchServe()
         GameBarAction.UNDO -> onUndo()
+        GameBarAction.MANAGE_QUEUE -> onManageQueue()
     }
 }

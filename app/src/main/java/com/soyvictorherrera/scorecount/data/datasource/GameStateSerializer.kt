@@ -35,6 +35,7 @@ object GameStateSerializer : Serializer<GameStateProto> {
             .setPlayer2SetsWon(0)
             .setIsDeuce(false)
             .setIsFinished(false)
+            .addAllChallengerQueue(emptyList())
             .build()
 
     override suspend fun readFrom(input: InputStream): GameStateProto {

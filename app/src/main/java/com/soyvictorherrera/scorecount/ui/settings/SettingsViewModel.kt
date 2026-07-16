@@ -5,6 +5,7 @@ import androidx.compose.material.icons.automirrored.filled.RotateRight
 import androidx.compose.material.icons.filled.Badge
 import androidx.compose.material.icons.filled.CalendarToday
 import androidx.compose.material.icons.filled.EmojiEvents
+import androidx.compose.material.icons.filled.Group
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.MilitaryTech
 import androidx.compose.material.icons.filled.Person
@@ -170,6 +171,11 @@ class SettingsViewModel
             saveSettings()
         }
 
+        fun updateChallengerMode(enabled: Boolean) {
+            _settings.value = _settings.value.copy(challengerMode = enabled)
+            saveSettings()
+        }
+
         private fun saveSettings() {
             viewModelScope.launch(dispatcher) {
                 settingsRepository.saveSettings(_settings.value)
@@ -209,6 +215,13 @@ class SettingsViewModel
                     currentSettings.keepScreenOn
                 ) {
                     updateKeepScreenOn(it)
+                },
+                SettingItemData.ToggleItem(
+                    R.string.setting_challenger_mode,
+                    Icons.Filled.Group,
+                    currentSettings.challengerMode
+                ) {
+                    updateChallengerMode(it)
                 }
             )
 

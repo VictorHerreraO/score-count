@@ -27,10 +27,9 @@ import androidx.compose.ui.graphics.DefaultAlpha
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.soyvictorherrera.scorecount.R
 import com.soyvictorherrera.scorecount.ui.extension.shimmering
 
@@ -39,7 +38,8 @@ fun PlayerScoreCard(
     state: PlayerScoreCardState,
     showPlayerName: Boolean,
     onIncrement: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    playerNameTestTag: String? = null
 ) {
     val haptics = LocalHapticFeedback.current
     OutlinedCard(
@@ -63,41 +63,56 @@ fun PlayerScoreCard(
         border = playerScoreCardBorder(showBorder = state.isServing && !state.isFinished),
         colors =
             CardDefaults.outlinedCardColors(
-                containerColor = if (state.isServing && !state.isFinished) {
-                    MaterialTheme.colorScheme.surfaceVariant
-                } else {
-                    MaterialTheme.colorScheme.surfaceContainer
-                },
+                containerColor =
+                    if (state.isServing && !state.isFinished) {
+                        MaterialTheme.colorScheme.surfaceVariant
+                    } else {
+                        MaterialTheme.colorScheme.surfaceContainer
+                    },
                 contentColor = MaterialTheme.colorScheme.primary
             )
     ) {
-        Box(
-            modifier = Modifier.fillMaxSize()
+        PlayerScoreCardBody(
+            state = state,
+            showPlayerName = showPlayerName,
+            playerNameTestTag = playerNameTestTag
+        )
+    }
+}
+
+@Composable
+private fun PlayerScoreCardBody(
+    state: PlayerScoreCardState,
+    showPlayerName: Boolean,
+    playerNameTestTag: String? = null
+) {
+    Box(
+        modifier = Modifier.fillMaxSize()
+    ) {
+        if (!state.isFinished && state.isServing) {
+            ServeIndicator(
+                modifier =
+                    Modifier
+                        .align(Alignment.TopStart)
+                        .padding(all = 14.dp)
+            )
+        }
+        Column(
+            modifier = Modifier.align(Alignment.Center),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            if (!state.isFinished && state.isServing) {
-                ServeIndicator(
-                    modifier =
-                        Modifier
-                            .align(Alignment.TopStart)
-                            .padding(all = 14.dp)
-                )
-            }
-            Column(
-                modifier = Modifier.align(Alignment.Center),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                if (showPlayerName) {
-                    Text(
-                        state.playerName,
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
+            if (showPlayerName) {
                 Text(
-                    text = state.score.toString(),
-                    style = MaterialTheme.typography.displayLarge
+                    text = state.playerName,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = if (playerNameTestTag != null) Modifier.testTag(playerNameTestTag) else Modifier
                 )
             }
+            Text(
+                text = state.score.toString(),
+                style = MaterialTheme.typography.displayLarge
+            )
         }
     }
 }

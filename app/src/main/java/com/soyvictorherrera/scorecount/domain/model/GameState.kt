@@ -7,7 +7,8 @@ data class GameState(
     val player1SetsWon: Int = 0,
     val player2SetsWon: Int = 0,
     val isDeuce: Boolean = false,
-    val isFinished: Boolean = false
+    val isFinished: Boolean = false,
+    val challengerQueue: List<Player> = emptyList()
 ) {
     val currentSet =
         if (isFinished) {

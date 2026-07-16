@@ -348,4 +348,43 @@ class ScoreUseCasesTest {
             // After undo, scores should be back to what they were before reset
             assertEquals(7, undoneState.player1.score)
         }
+
+    @Test
+    fun `ResetGameUseCase with challengerMode rotates players correctly`() =
+        runTest {
+            // Given
+            val settings = GameSettings(challengerMode = true)
+            fakeSettingsRepository.setSettings(settings)
+
+            val useCase = ResetGameUseCase(fakeScoreRepository, fakeSettingsRepository)
+            val queue =
+                listOf(
+                    Player(id = 3, name = "Charlie"),
+                    Player(id = 4, name = "Dave")
+                )
+            val initialState =
+                GameState(
+                    player1 = Player(id = 1, name = "Alice", score = 11),
+                    player2 = Player(id = 2, name = "Bob", score = 9),
+                    servingPlayerId = 1,
+                    player1SetsWon = 3,
+                    player2SetsWon = 1,
+                    isFinished = true,
+                    challengerQueue = queue
+                )
+            fakeScoreRepository.setState(initialState)
+
+            // When - Player 1 won the match, so Alice stays and Bob is rotated out for Charlie
+            useCase(lastGameWinnerId = 1)
+
+            // Then
+            val newState = fakeScoreRepository.getGameState().value
+            assertEquals(1, newState.player1.id)
+            assertEquals("Alice", newState.player1.name)
+            assertEquals(3, newState.player2.id)
+            assertEquals("Charlie", newState.player2.name)
+            assertEquals(2, newState.challengerQueue.size)
+            assertEquals(4, newState.challengerQueue[0].id)
+            assertEquals(2, newState.challengerQueue[1].id)
+        }
 }

@@ -12,6 +12,7 @@ message GameStateProto {
   int32 player2_sets_won = 5;
   bool is_deuce = 6;
   bool is_finished = 7;
+  repeated PlayerProto challenger_queue = 8;
 }
 
 message PlayerProto {

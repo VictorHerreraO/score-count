@@ -4,6 +4,8 @@ import android.content.res.Configuration.UI_MODE_NIGHT_YES
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewLightDark
+import com.soyvictorherrera.scorecount.data.database.dao.PlayerProfileDao
+import com.soyvictorherrera.scorecount.data.database.entity.PlayerProfileEntity
 import com.soyvictorherrera.scorecount.domain.model.GameState
 import com.soyvictorherrera.scorecount.domain.model.Player
 import com.soyvictorherrera.scorecount.domain.usecase.DecrementScoreUseCase
@@ -17,6 +19,8 @@ import com.soyvictorherrera.scorecount.ui.scorescreen.ScoreScreen
 import com.soyvictorherrera.scorecount.ui.scorescreen.ScoreViewModel
 import com.soyvictorherrera.scorecount.ui.theme.ScoreCountTheme
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOf
 
 @PreviewLightDark
 @Composable
@@ -97,10 +101,20 @@ private fun createPreviewViewModel(finished: Boolean = false): ScoreViewModel {
             undo = UndoScoreUseCase(fakeScoreRepo)
         )
 
+    val fakePlayerProfileDao =
+        object : PlayerProfileDao {
+            override fun getAllPlayerProfiles(): Flow<List<PlayerProfileEntity>> = flowOf(emptyList())
+
+            override suspend fun insert(playerProfile: PlayerProfileEntity): Long = 0L
+
+            override suspend fun delete(playerProfile: PlayerProfileEntity) {}
+        }
+
     return ScoreViewModel(
         scoreRepository = fakeScoreRepo,
         scoreUseCases = scoreUseCases,
         settingsRepository = fakeSettingsRepo,
+        playerProfileDao = fakePlayerProfileDao,
         dispatcher = Dispatchers.Unconfined
     )
 }
